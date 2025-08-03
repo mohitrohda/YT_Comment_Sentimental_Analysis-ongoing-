@@ -32,5 +32,4 @@ http://localhost:5000/predict
 ```
 
 
-
-chrome://extensions
+chrome://extensions 
