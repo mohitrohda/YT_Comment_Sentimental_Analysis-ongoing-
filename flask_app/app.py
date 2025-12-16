@@ -79,7 +79,7 @@ def load_model(model_path, vectorizer_path):
 
 
 # Initialize the model and vectorizer
-model, vectorizer = load_model("./lgbm_model.pkl", "./tfidf_vectorizer.pkl")  
+model, vectorizer = load_model("lgbm_model.pkl", "tfidf_vectorizer.pkl")  
 
 # Initialize the model and vectorizer
 # model, vectorizer = load_model_and_vectorizer("yt_chrome_plugin_model", "1", "./tfidf_vectorizer.pkl")  #
