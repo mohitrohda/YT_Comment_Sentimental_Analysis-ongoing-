@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", async () => {
-  const API_KEY = 'AIzaSyCZOQ_x5B_TKYVDFbFgo1KbTklhXhDSP0M';
+  const API_KEY = '';
   const API_URL = 'http://localhost:5001/';
 
   // DOM Elements
