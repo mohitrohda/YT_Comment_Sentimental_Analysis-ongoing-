@@ -1,80 +1,504 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="UTF-8">
   <title>YouTube Comment Insights</title>
   <style>
-    /* Dark Theme */
+    /* Modern Dark Theme with Gradient */
     body {
-      font-family: Arial, sans-serif;
-      padding: 10px;
-      background-color: #1e1e1e;
-      color: #f1f1f1;
-      margin: 0;
-      box-sizing: border-box;
-      width: 320px; /* Set a width that fits the Chrome extension popup */
-    }
-    h1 {
-      font-size: 20px;
-      color: #ffffff;
-    }
-    .section {
-      margin-bottom: 15px;
-    }
-    .section-title {
-      font-weight: bold;
-      color: #0099ff;
-      margin-top: 10px;
-      font-size: 16px;
-    }
-    .comment-list {
-      list-style: none;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       padding: 0;
+      background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+      color: #e0e0e0;
+      margin: 0;
+      width: 400px;
+      min-height: 600px;
+      position: relative;
+      overflow-x: hidden;
     }
-    .comment-item {
-      margin: 8px 0;
-      padding: 8px;
-      background-color: #444;
-      border-radius: 4px;
-    }
-    .comment-sentiment {
-      font-weight: bold;
-      color: #ffffff;
-    }
-    /* Image Styling */
-    img {
+
+    /* Animated Background */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
       width: 100%;
+      height: 100%;
+      background: 
+        radial-gradient(circle at 20% 80%, rgba(0, 153, 255, 0.1) 0%, transparent 40%),
+        radial-gradient(circle at 80% 20%, rgba(255, 51, 102, 0.1) 0%, transparent 40%);
+      z-index: -1;
+    }
+
+    /* Header */
+    .header {
+      background: linear-gradient(90deg, #0099ff 0%, #00ccff 100%);
+      padding: 20px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .header::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%);
+      animation: shimmer 3s infinite linear;
+    }
+
+    @keyframes shimmer {
+      0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+      100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+    }
+
+    h1 {
+      font-size: 24px;
+      color: white;
+      margin: 0;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+      position: relative;
+      z-index: 1;
+    }
+
+    .subtitle {
+      color: rgba(255,255,255,0.9);
+      font-size: 12px;
+      margin-top: 5px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Main Container */
+    .container {
+      padding: 20px;
+    }
+
+    /* Video Info */
+    .video-info {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+    }
+
+    .video-id {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .video-id-label {
+      color: #00ccff;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .video-id-value {
+      background: rgba(0, 204, 255, 0.1);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-family: monospace;
+      border: 1px solid rgba(0, 204, 255, 0.3);
+    }
+
+    /* Loading Animation */
+    .loading {
+      text-align: center;
+      padding: 30px;
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(0, 153, 255, 0.3);
+      border-top-color: #0099ff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 15px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+
+    .stat-card {
+      background: linear-gradient(145deg, rgba(255,255,255,0.05), rgba(0,0,0,0.2));
+      border-radius: 12px;
+      padding: 15px;
+      text-align: center;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0, 153, 255, 0.2);
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(90deg, #0099ff, #00ccff);
+    }
+
+    .stat-icon {
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: bold;
+      color: white;
+      margin: 5px 0;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: #aaa;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* Section Styling */
+    .section {
+      background: rgba(30, 30, 30, 0.7);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      animation: fadeInUp 0.5s ease;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .section-title {
+      color: #00ccff;
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-title::before {
+      content: '';
+      width: 4px;
+      height: 20px;
+      background: #00ccff;
+      border-radius: 2px;
+    }
+
+    /* Sentiment Distribution */
+    .sentiment-bars {
+      display: flex;
+      height: 60px;
+      border-radius: 8px;
+      overflow: hidden;
+      margin: 15px 0;
+    }
+
+    .sentiment-bar {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      transition: flex 0.5s ease;
+    }
+
+    .positive { background: linear-gradient(to right, #00b09b, #96c93d); }
+    .neutral { background: linear-gradient(to right, #ffd89b, #19547b); }
+    .negative { background: linear-gradient(to right, #ff416c, #ff4b2b); }
+
+    /* Image Containers */
+    .image-container {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .image-container img {
+      width: 100%;
+      border-radius: 6px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+
+    /* Comments List */
+    .comments-container {
+      max-height: 300px;
+      overflow-y: auto;
+      margin-top: 15px;
+    }
+
+    .comment-item {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 10px;
+      border-left: 3px solid #0099ff;
+      transition: all 0.3s ease;
+    }
+
+    .comment-item:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateX(5px);
+    }
+
+    .comment-text {
+      color: #e0e0e0;
+      font-size: 14px;
+      line-height: 1.4;
+      margin-bottom: 8px;
+    }
+
+    .comment-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: #aaa;
+    }
+
+    .sentiment-badge {
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: bold;
+    }
+
+    .sentiment-positive { background: rgba(0, 176, 155, 0.2); color: #00b09b; }
+    .sentiment-neutral { background: rgba(255, 216, 155, 0.2); color: #ffd89b; }
+    .sentiment-negative { background: rgba(255, 65, 108, 0.2); color: #ff416c; }
+
+    /* Progress Bar */
+    .progress-bar {
+      height: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 10px 0;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #0099ff, #00ccff);
+      border-radius: 4px;
+      transition: width 1s ease;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 5px;
+      margin-bottom: 20px;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 5px;
+      border-radius: 10px;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 10px;
+      text-align: center;
+      background: transparent;
+      border: none;
+      color: #aaa;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 14px;
+    }
+
+    .tab.active {
+      background: linear-gradient(90deg, #0099ff, #00ccff);
+      color: white;
+      box-shadow: 0 4px 15px rgba(0, 153, 255, 0.3);
+    }
+
+    /* Tab Content */
+    .tab-content {
+      display: none;
+      animation: fadeIn 0.5s ease;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 15px;
+      color: #666;
+      font-size: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
       margin-top: 20px;
     }
-    /* Metrics Styling */
-    .metrics-container {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
+
+    /* Scrollbar Styling */
+    ::-webkit-scrollbar {
+      width: 6px;
     }
-    .metric {
-      width: 48%;
-      background-color: #444;
-      margin-bottom: 10px;
-      padding: 10px;
-      border-radius: 4px;
+
+    ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, #0099ff, #00ccff);
+      border-radius: 3px;
+    }
+
+    /* Error Message */
+    .error {
+      background: rgba(255, 65, 108, 0.1);
+      border: 1px solid rgba(255, 65, 108, 0.3);
+      color: #ff416c;
+      padding: 15px;
+      border-radius: 8px;
       text-align: center;
-      box-sizing: border-box;
+      margin: 20px 0;
     }
-    .metric-title {
-      font-size: 12px;
-      color: #cccccc;
+
+    /* Success Message */
+    .success {
+      background: rgba(0, 176, 155, 0.1);
+      border: 1px solid rgba(0, 176, 155, 0.3);
+      color: #00b09b;
+      padding: 15px;
+      border-radius: 8px;
+      text-align: center;
+      margin: 20px 0;
     }
-    .metric-value {
-      font-size: 22px;
+
+    /* Sentiment Score Circle */
+    .sentiment-score {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: conic-gradient(#00b09b 0% 70%, #ffd89b 70% 85%, #ff416c 85% 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      position: relative;
+    }
+
+    .sentiment-score::before {
+      content: '';
+      position: absolute;
+      width: 70px;
+      height: 70px;
+      background: #1e1e1e;
+      border-radius: 50%;
+    }
+
+    .score-value {
+      position: relative;
+      z-index: 1;
+      color: white;
+      font-size: 24px;
       font-weight: bold;
-      color: #ffffff;
-      margin-top: 5px;
     }
   </style>
 </head>
 <body>
-  <h1>YouTube Comment Insights</h1>
-  <div id="output" class="section"></div>
+  <div class="header">
+    <h1>YouTube Comment Insights</h1>
+    <div class="subtitle">Real-time sentiment analysis & engagement metrics</div>
+  </div>
+
+  <div class="container">
+    <!-- Video Info Section -->
+    <div class="video-info" id="videoInfo">
+      <div class="video-id">
+        <span class="video-id-label">Video ID:</span>
+        <span class="video-id-value" id="videoIdDisplay">Loading...</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressBar" style="width: 0%"></div>
+      </div>
+      <div id="statusMessage" class="status"></div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" data-tab="overview">📊 Overview</button>
+      <button class="tab" data-tab="sentiment">😊 Sentiment</button>
+      <button class="tab" data-tab="comments">💬 Comments</button>
+      <button class="tab" data-tab="insights">🔍 Insights</button>
+    </div>
+
+    <!-- Tab Contents -->
+    <div id="overview" class="tab-content active">
+      <!-- Stats will be populated here -->
+    </div>
+
+    <div id="sentiment" class="tab-content">
+      <!-- Sentiment analysis results -->
+    </div>
+
+    <div id="comments" class="tab-content">
+      <!-- Top comments -->
+    </div>
+
+    <div id="insights" class="tab-content">
+      <!-- Additional insights -->
+    </div>
+
+    <!-- Loading State -->
+    <div id="loading" class="loading">
+      <div class="spinner"></div>
+      <p>Analyzing comments...</p>
+      <p id="progressText">Fetching data...</p>
+    </div>
+  </div>
+
+  <div class="footer">
+    Powered by Sentiment Analysis AI • Updated just now
+  </div>
+
   <script src="popup.js"></script>
 </body>
 </html>
